@@ -4,5 +4,5 @@ def main():
     # This is a main function
     run = legoM.LegoM()
     run.DH()
-    run.IK([100,50,10,np.pi,np.pi/2,np.pi/2],'radians')
+    run.IK([125,150,60,np.pi/4,np.pi/8,np.pi],'radians')
 main()    

@@ -4,7 +4,7 @@ import keyboard
 class LegoM:
     def __init__(self):
         self.fileName = "main.py"
-        self.limitsDegrees = [[-170, 170], [-350, 350], [10, 155], [-115, 115], [-150, -10], [-350, 350]]
+        self.limitsDegrees = [[-170, 160], [-350, 350], [10, 145], [-115, 105], [-150, -20], [-350, 350]]
         self.limitsRadian = np.deg2rad(self.limitsDegrees)
         self.__DHParams()
     def __DHParams(self):
@@ -86,7 +86,7 @@ class LegoM:
     "torqueLimitWrist = 30\n\n"
     
     "def dutyLimitMotors():\n"
-    "    motorA.control.limits(torque=100)\n"
+    "    motorA.control.limits(torque=150)\n"
     "    motorB.control.limits(torque=135)\n"
     "    motorC.control.limits(torque=torqueLimit)\n"
     "    motorD.control.limits(torque=torqueLimit)\n"
@@ -170,13 +170,14 @@ class LegoM:
     "            motorF.angle()\n"
     "        ]\n"
     "        if await check_motor():\n"
-    "            watch.stop()\n"
     "            print('Jobs done')\n"
     "            print('Elapsed time:',watch.time()/1000,'s')\n"
     "            print(f\"{'Error':>10} {abs(direction_list[0]) - abs(angles[0]):>10.2f} {abs(direction_list[1]) - abs(angles[1]):>10.2f} {abs(direction_list[2]) - abs(angles[2]):>10.2f} {abs(direction_list[3]) - abs(angles[3]):>10.2f} {abs(direction_list[4]) - abs(angles[4]):>10.2f} {abs(direction_list[5]) - abs(angles[5]):>10.2f}\")\n"
     "            print(f\"{'Angle result':>10} {angles[0]:>10.2f} {angles[1]:>10.2f} {angles[2]:>10.2f} {angles[3]:>10.2f} {angles[4]:>10.2f} {angles[5]:>10.2f}\")\n"
     "            break\n\n"
-    "        await wait(100)\n\n"
+   
+    "        await wait(1000)\n\n"
+    "        print(f\"{'Current angle':>10} {angles[0]:>10.2f} {angles[1]:>10.2f} {angles[2]:>10.2f} {angles[3]:>10.2f} {angles[4]:>10.2f} {angles[5]:>10.2f}\")\n"
     
     "async def driveMotors(watch):\n"
     "    await multitask(run_motors(),stallMotors(), print_angles(watch))\n\n"
@@ -184,6 +185,7 @@ class LegoM:
     "def main():\n"
     "    homing()\n"
     "    dutyLimitMotors()\n"
+    "    hub."
     "    watch = StopWatch()\n"
     "    run_task(driveMotors(watch))\n"
     "    watch.reset()\n\n"
@@ -211,5 +213,5 @@ class LegoM:
     def __runFile(self):
         print("Press 'q' to run the program, make sure bluetooth on your device is on and the robot is turned on")
         keyboard.wait('q')
-        command = f'pipx run pybricksdev run ble main.mpy'
+        command = f'pipx run pybricksdev run ble main.py'
         result = self.__terminalCmd(command)
