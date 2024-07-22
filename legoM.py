@@ -1,10 +1,10 @@
 import sys, subprocess,roboticstoolbox as rtb, numpy as np
 from spatialmath import SE3
-import keyboard, platform
+import keyboard
 class LegoM:
     def __init__(self):
         self.fileName = "main.py"
-        self.limitsDegrees = [[-90, 90], [-350, 350], [10, 130], [-115, 115], [-150, -30], [-350, 350]]
+        self.limitsDegrees = [[-170, 170], [-350, 350], [10, 155], [-115, 115], [-150, -10], [-350, 350]]
         self.limitsRadian = np.deg2rad(self.limitsDegrees)
         self.__DHParams()
     def __DHParams(self):
@@ -21,7 +21,10 @@ class LegoM:
             self.link = rtb.RevoluteDH(d=param[2], a=param[1], alpha=param[0], offset=param[3])
             self.links.append(self.link)
         self.kuka_robot = rtb.DHRobot(self.links, name='KUKA 6-DOF')
-        self.kuka_robot.qlim = np.ndarray(shape=(2,6),dtype=float, order='F', buffer=self.limitsRadian)
+        limitArray = np.ndarray(shape=(2,6),dtype=float, order='F', buffer=self.limitsRadian)
+        print(limitArray)
+        print(self.limitsRadian)
+        self.kuka_robot.qlim = limitArray
     def DH(self):
         print(self.kuka_robot)
     def FK(self,angles,type):
@@ -50,12 +53,13 @@ class LegoM:
             pose[4] = np.deg2rad(pose[4])
             pose[5] = np.deg2rad(pose[5])
         T = SE3.Trans(pose[0], pose[1], pose[2]) * SE3.RPY(pose[3], pose[4], pose[5])
-        self.solution = self.kuka_robot.ikine_LM(T)
+        self.solution = self.kuka_robot.ikine_GN(T,joint_limits=True)
         if self.solution.success:
            print(f'Solution found: {self.solution.q}')
         else:
             print('No solutions found for the given pose.')
             return
+        
         self.sol_lists = [0] * len(self.solution.q)
         self.sol_lists = self.solution.q * 180 / np.pi
         self.sol_lists = self.sol_lists.tolist()
@@ -168,7 +172,7 @@ class LegoM:
     "        if await check_motor():\n"
     "            watch.stop()\n"
     "            print('Jobs done')\n"
-    "            print('Elapsed time:',watch.time()/1000,'s)\n'"
+    "            print('Elapsed time:',watch.time()/1000,'s')\n"
     "            print(f\"{'Error':>10} {abs(direction_list[0]) - abs(angles[0]):>10.2f} {abs(direction_list[1]) - abs(angles[1]):>10.2f} {abs(direction_list[2]) - abs(angles[2]):>10.2f} {abs(direction_list[3]) - abs(angles[3]):>10.2f} {abs(direction_list[4]) - abs(angles[4]):>10.2f} {abs(direction_list[5]) - abs(angles[5]):>10.2f}\")\n"
     "            print(f\"{'Angle result':>10} {angles[0]:>10.2f} {angles[1]:>10.2f} {angles[2]:>10.2f} {angles[3]:>10.2f} {angles[4]:>10.2f} {angles[5]:>10.2f}\")\n"
     "            break\n\n"
@@ -192,8 +196,6 @@ class LegoM:
         print(self.limitsDegrees)
 
     def __terminalCmd(self, command):
-        if platform.system() == 'linux':
-            command = command.split
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(result.stdout)
         return result
